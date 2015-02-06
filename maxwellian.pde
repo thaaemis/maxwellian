@@ -24,6 +24,7 @@ void setup()
   fill(0,150);
   noStroke();
 
+  // Get real Maxwell distribution
   int summaxwell = 0;
   for (int i=1; i<100; i++) {
     float maxnow = pow(m/(2*pi*k*T),3/2)*4*pi*i*i*pow(2.71,-m*i*i/(2*k*T))*1000;
@@ -43,6 +44,7 @@ void setup()
     }
   }
   
+  // Declare balls with random starting points and maxwellian velocities
   for (int i=1; i<num_balls; i++) {
     balls[i] = new ball(di, random(wid), random(hei), t[int(random(0,100))], t[int(random(0,100))], 0);
   }

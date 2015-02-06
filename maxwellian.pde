@@ -1,6 +1,6 @@
 int wid = 640;
 int hei = 360;
-int num_balls = 50;
+int num_balls = 200;
 float m = pow(10,-22);
 float pi = 3.1415926;
 float k = 1.3806488*pow(10,-23);
@@ -9,8 +9,8 @@ int di = 6;
 
 PFont f;
  
-int[] t = new int[100];
-float[] maxwell = new float[100];
+float[] t = new float[10000];
+int[] maxwell = new int[100];
 
 float[][] pos = new float[num_balls][2];
 
@@ -24,16 +24,27 @@ void setup()
   fill(0,150);
   noStroke();
 
+  int summaxwell = 0;
   for (int i=1; i<100; i++) {
-    t[i] = i;
-    float maxnow = pow(m/(2*pi*k*T),3/2)*4*pi*i*i*pow(2.71,-m*i*i/(2*k*T));
-    i = i;
-    maxwell[i] = maxnow;
-    print(i+" "+maxwell[i]+"\n");
+    float maxnow = pow(m/(2*pi*k*T),3/2)*4*pi*i*i*pow(2.71,-m*i*i/(2*k*T))*1000;
+    maxwell[i] = int(maxnow);
+    summaxwell = summaxwell + maxwell[i];
+    println(i+" "+maxwell[i]+"\n");
+  }
+  for (int i=0; i<100; i++) {
+    maxwell[i] = int(maxwell[i] * 10000 / summaxwell);
+  }
+  int count=0;
+  for (int i=0; i<100; i++) {
+    for (int j=maxwell[i]; j>0; j--) {
+      int sign = count%2 == 0? 1:-1;
+      t[count] = float(maxwell[i])/20*sign;
+      count = count+1;
+    }
   }
   
   for (int i=1; i<num_balls; i++) {
-    balls[i] = new ball(di, random(wid), random(hei), maxwell[int(random(0,100))], maxwell[int(random(0,100))], 0);
+    balls[i] = new ball(di, random(wid), random(hei), t[int(random(0,100))], t[int(random(0,100))], 0);
   }
   
   for (int i=0; i<num_balls; i++) {
@@ -90,12 +101,6 @@ class ball
   void move () {
     xpos = xpos + vx;
     ypos = ypos + vy;
-
-    }
-  }
-  
-  void collision() {
-    index = int(substring(1));
     if (xpos - diam/2 < 0 | xpos + diam/2 > wid) {
       vx = -vx;
       col = 30;
@@ -104,10 +109,22 @@ class ball
       vy = -vy;
       col = 30;
     }
-  //  for (i=0,i<num_balls,i++) {
-    //  if (i != index) {
-      //  if (xpos > balls[i].w() - di & xpos < balls[i].w() + di) {
   }
+  
+//  void collision() {
+//    int index = int(substring(1));
+//    if (xpos - diam/2 < 0 | xpos + diam/2 > wid) {
+//      vx = -vx;
+//      col = 30;
+//    }
+//    if (ypos - diam/2 < 0 | ypos + diam/2 > hei) {
+//      vy = -vy;
+//      col = 30;
+//    }
+//   for (i=0,i<num_balls,i++) {
+//     if (i != index) {
+//       if (xpos > balls[i].w() - di & xpos < balls[i].w() + di) {
+//  }
   
   void display() {
     fill(0);

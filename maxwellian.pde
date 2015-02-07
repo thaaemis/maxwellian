@@ -1,6 +1,6 @@
 int wid = 640;
 int hei = 360;
-int num_balls = 200;
+int num_balls = 500;
 float m = pow(10,-22);
 float pi = 3.1415926;
 float k = 1.3806488*pow(10,-23);
@@ -26,7 +26,7 @@ void setup()
 
   // Get real Maxwell distribution
   int summaxwell = 0;
-  for (int i=1; i<300; i++) {
+  for (int i=0; i<300; i++) {
     float maxnow = pow(m/(2*pi*k*T),3/2)*4*pi*i*i*pow(2.71,-m*i*i/(2*k*T))*1000;
     maxwell[i] = int(maxnow);
     summaxwell = summaxwell + maxwell[i];
@@ -45,8 +45,9 @@ void setup()
   }
   
   // Declare balls with random starting points and maxwellian velocities
-  for (int i=1; i<num_balls; i++) {
-    balls[i] = new ball(di, random(wid), random(hei), t[int(random(0,100))], t[int(random(0,100))], 0);
+  for (int i=0; i<num_balls; i++) {
+    balls[i] = new ball(di, random(di/2,wid-di/2), random(di/2,hei-di/2), 
+                t[int(random(0,100))], t[int(random(0,100))], 0);
   }
   
   for (int i=0; i<num_balls; i++) {
@@ -62,21 +63,25 @@ void setup()
 void draw()
 {
   background(255);
-  textFont(f,16);
-  fill(0);
-  text("Temp = "+nf(T,4,0), 10, 30);
   
-  for (int i=1; i<num_balls; i++) {
-    balls[i].display();
-    balls[i].move();
-    pos[i][0] = balls[i].h();
-    pos[i][1] = balls[i].w();
+  float energy = 0;
+  
+  for (int i=0; i<num_balls; i++) {
+    pos[i][0] = balls[i].w();
+    pos[i][1] = balls[i].h();
     pos[i][2] = balls[i].r();
   } 
   
-  for (int i=1; i<num_balls; i++) {
+  for (int i=0; i<num_balls; i++) {
     balls[i].collision(pos,i);
+    balls[i].display();
+    balls[i].move();
+    energy = energy + balls[i].energy();
   }
+  textFont(f,16);
+  fill(0);
+  text("Energy = "+nf(energy,4,0), 10, 30);
+
 }
   
 class ball
@@ -109,6 +114,10 @@ class ball
     return diam/2;
   }
   
+  float energy() {
+    return vx*vx + vy*vy;
+  }
+  
   void move () {
     xpos = xpos + vx;
     ypos = ypos + vy;
@@ -125,11 +134,11 @@ class ball
   void collision(float[][] pos, int index) {
     for (int i=0;i<num_balls;i++) {
       if (i != index) {
-        float diffy = ypos - pos[i][1];
-        float diffx = xpos - pos[i][0];
-        float sumrad = (pos[i][2] + diam)/2;
+        float diffy = abs(ypos - pos[i][1]);
+        float diffx = abs(xpos - pos[i][0]);
+        float sumrad = (pos[i][2] + diam/2);
         float colangle = atan(diffy/diffx);
-        if (sqrt(pow(diffx,2) + pow(diffy,2)) < sumrad) {
+        if (sqrt(pow(diffx,2) + pow(diffy,2)) <= sumrad) {
           vx = -vx*cos(colangle);
           vy = -vy*sin(colangle);
           col = 30;

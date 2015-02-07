@@ -5,14 +5,14 @@ float m = pow(10,-22);
 float pi = 3.1415926;
 float k = 1.3806488*pow(10,-23);
 float T = 30000;
-int di = 6;
+float di = 6;
 
 PFont f;
  
 float[] t = new float[10000];
-int[] maxwell = new int[100];
+int[] maxwell = new int[300];
 
-float[][] pos = new float[num_balls][2];
+float[][] pos = new float[num_balls][3];
 
 
 ball[] balls = new ball[num_balls];
@@ -26,17 +26,17 @@ void setup()
 
   // Get real Maxwell distribution
   int summaxwell = 0;
-  for (int i=1; i<100; i++) {
+  for (int i=1; i<300; i++) {
     float maxnow = pow(m/(2*pi*k*T),3/2)*4*pi*i*i*pow(2.71,-m*i*i/(2*k*T))*1000;
     maxwell[i] = int(maxnow);
     summaxwell = summaxwell + maxwell[i];
     println(i+" "+maxwell[i]+"\n");
   }
-  for (int i=0; i<100; i++) {
+  for (int i=0; i<300; i++) {
     maxwell[i] = int(maxwell[i] * 10000 / summaxwell);
   }
   int count=0;
-  for (int i=0; i<100; i++) {
+  for (int i=0; i<300; i++) {
     for (int j=maxwell[i]; j>0; j--) {
       int sign = count%2 == 0? 1:-1;
       t[count] = float(maxwell[i])/20*sign;
@@ -50,7 +50,7 @@ void setup()
   }
   
   for (int i=0; i<num_balls; i++) {
-    for (int j=0; j<2; j++) {
+    for (int j=0; j<3; j++) {
       pos[i][j] = 0;
     }
   }
@@ -71,19 +71,24 @@ void draw()
     balls[i].move();
     pos[i][0] = balls[i].h();
     pos[i][1] = balls[i].w();
+    pos[i][2] = balls[i].r();
   } 
+  
+  for (int i=1; i<num_balls; i++) {
+    balls[i].collision(pos,i);
+  }
 }
   
 class ball
 {
-  int diam; // ball diameter (constant)
+  float diam; // ball diameter (constant)
   float xpos; // ball xposition
   float ypos; // ball vertical position
   float vx; // ball velocity in x
   float vy; // ball velocity in y
   int col; // recent collision info
   
-  ball(int idiam, float ix, float iy, float ivx, float ivy, int icol) {
+  ball(float idiam, float ix, float iy, float ivx, float ivy, int icol) {
     diam = idiam;
     xpos = ix;
     ypos = iy; 
@@ -100,6 +105,10 @@ class ball
     return xpos;
   }
   
+  float r() {
+    return diam/2;
+  }
+  
   void move () {
     xpos = xpos + vx;
     ypos = ypos + vy;
@@ -113,20 +122,21 @@ class ball
     }
   }
   
-//  void collision() {
-//    int index = int(substring(1));
-//    if (xpos - diam/2 < 0 | xpos + diam/2 > wid) {
-//      vx = -vx;
-//      col = 30;
-//    }
-//    if (ypos - diam/2 < 0 | ypos + diam/2 > hei) {
-//      vy = -vy;
-//      col = 30;
-//    }
-//   for (i=0,i<num_balls,i++) {
-//     if (i != index) {
-//       if (xpos > balls[i].w() - di & xpos < balls[i].w() + di) {
-//  }
+  void collision(float[][] pos, int index) {
+    for (int i=0;i<num_balls;i++) {
+      if (i != index) {
+        float diffy = ypos - pos[i][1];
+        float diffx = xpos - pos[i][0];
+        float sumrad = (pos[i][2] + diam)/2;
+        float colangle = atan(diffy/diffx);
+        if (sqrt(pow(diffx,2) + pow(diffy,2)) < sumrad) {
+          vx = -vx*cos(colangle);
+          vy = -vy*sin(colangle);
+          col = 30;
+        }
+      }
+    }
+  }
   
   void display() {
     fill(0);
@@ -151,4 +161,3 @@ class ball
     }
   }
 }
-
